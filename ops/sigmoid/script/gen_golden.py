@@ -53,7 +53,9 @@ def main() -> int:
         for shape in case["shapes"]:
             for dtype_name in case["dtypes"]:
                 dtype = getattr(torch, dtype_name)
-                for repeat in range(input_spec["seeds_per_case"]):
+                repeats = case.get("seeds_per_case",
+                                   input_spec["seeds_per_case"])
+                for repeat in range(repeats):
                     seed = input_spec["seed_base"] + count
                     generator = torch.Generator().manual_seed(seed)
                     factory = (torch.randn if case["distribution"] == "normal"

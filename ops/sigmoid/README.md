@@ -14,6 +14,13 @@ Triton 写法，供后续五个平台复用与适配。
 | 通用后端 | mask 保护，大张量 block 65536，无 autotune |
 | 回退 | 非 strided 或非支持 dtype 走原生 redispatch |
 
+注册入口遵循当前 A1 契约：
+
+```python
+register_a1(dispatch_key="CUDA", counter={"n": 0},
+            platform="p800-kunlunxin-gems5")
+```
+
 ## 目录入口
 
 - `reference.py`：判卷参考；
@@ -23,6 +30,7 @@ Triton 写法，供后续五个平台复用与适配。
 - `register.py`：A1 注册与命中计数；
 - `test/`：kernel、op、应用三层测试；
 - `goldendata/` 与 `script/`：声明式黄金数据和性能脚本。
+- `reports/scope.md`：明确自研、回退和不在范围的接口/dtype/shape。
 
 ## 复现
 
@@ -40,6 +48,8 @@ python3 ops/sigmoid/script/bench_perf.py --impl triton --device cuda:0
 python3 ops/sigmoid/script/bench_perf.py --impl native --device cuda:0
 python3 ops/sigmoid/script/bench_perf.py --impl flaggems --device cuda:0
 python3 ops/sigmoid/script/bench_dispatch.py --device p800-liyanz-local
+python3 ops/sigmoid/script/bench_matrix.py \
+  --profile p800-liyanz-local --out /tmp/sigmoid-p800-matrix.json
 ```
 
 硬件级昆仑芯 XTC 实现不在本次 Triton 级交付范围内，见

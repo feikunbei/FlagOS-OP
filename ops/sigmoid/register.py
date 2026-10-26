@@ -11,6 +11,11 @@ _COUNT_BASE = os.environ.get("A1_SIGMOID_COUNT_FILE")
 COUNT_FILE = f"{_COUNT_BASE}.{os.getpid()}" if _COUNT_BASE else None
 _LIB = None
 _REGISTERED_KEY = None
+_COUNTERS = []
+_SUPPORTED_PLATFORMS = {
+    "kunlunxin", "p800-kunlunxin", "p800-kunlunxin-gems5",
+    "p800-liyanz-local",
+}
 
 
 def _load_impl():
@@ -23,6 +28,8 @@ def _load_impl():
 
 def _bump() -> None:
     CALL_COUNT["sigmoid"] = CALL_COUNT.get("sigmoid", 0) + 1
+    for counter in _COUNTERS:
+        counter["n"] = counter.get("n", 0) + 1
     if COUNT_FILE:
         counts = {}
         try:
@@ -41,11 +48,26 @@ def sigmoid_aten(self: torch.Tensor) -> torch.Tensor:
 
 
 def register_a1(
-    dispatch_key: str = "CUDA", *, platform: str | None = None
+    dispatch_key: str = "CUDA", counter: dict | None = None,
+    platform: str | None = None,
 ) -> torch.library.Library:
-    """注册一次并保持 Library 生命周期；``platform`` 供统一入口兼容。"""
-    del platform
+    """注册一次并保持 Library 生命周期。
+
+    ``counter`` 遵循仓库 A1 契约，在命中时增加 ``counter["n"]``；
+    ``platform`` 显式限定当前已交付的昆仑芯 P800 平台。
+    """
     global _LIB, _REGISTERED_KEY
+    if dispatch_key != "CUDA":
+        raise RuntimeError(
+            f"sigmoid P800 expects dispatch_key='CUDA', got {dispatch_key!r}"
+        )
+    if platform is not None and platform not in _SUPPORTED_PLATFORMS:
+        raise RuntimeError(
+            f"unknown platform={platform!r}; supported: "
+            f"{sorted(_SUPPORTED_PLATFORMS)}"
+        )
+    if counter is not None and counter not in _COUNTERS:
+        _COUNTERS.append(counter)
     if _LIB is not None:
         if dispatch_key != _REGISTERED_KEY:
             raise RuntimeError(

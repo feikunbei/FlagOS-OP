@@ -6,7 +6,7 @@
 # - 修改本文件后运行 scripts/build_ops_index.py。
 
 schema: 1
-updated: 2026-10-14
+updated: 2026-10-26
 
 target_scope:
   vendor_family_count: 6
@@ -72,6 +72,11 @@ operator_groups:
     kind: foundation
     rank: 5
     description: 覆盖单元素 tensor 转 Python 标量的路径，包括公开 item API 底层的私有 ATen 原语。
+  pointwise-activation:
+    title: 逐元素激活
+    kind: foundation
+    rank: 6
+    description: 覆盖常用激活函数的尺寸、dtype、布局、特殊值和 A1 注册范围。
 
 operators:
   - name: sdpa
@@ -245,6 +250,17 @@ operators:
     platforms:
       cambricon:
         profiles: [cambricon]
+
+  - name: sigmoid
+    directory: sigmoid
+    group: pointwise-activation
+    purpose: 标准 aten sigmoid 推理前向，覆盖 LLM 激活形状和安全 dtype 回退。
+    route: A1 · Triton
+    key_result: P800 kernel 75 例、黄金 93/93；三种核心浮点 dtype 应用消费通过。
+    platforms:
+      kunlunxin:
+        profiles: [p800-kunlunxin-gems5]
+        implementation: FlagGems pointwise_dynamic + P800 CodeGenConfig
 
 registration_contracts:
   cambricon-foundation:

@@ -6,7 +6,7 @@
 | 语义 | `1 / (1 + exp(-x))`，见 `reference.py` |
 | 路线 / 级别 | A1 / Triton 级 |
 | 首测设备 | 昆仑芯 P800，物理 2 号卡映射为容器 `cuda:0` |
-| 日期 / 状态 | 2026-10-10 / P800 功能验证完成，性能基线待建立 |
+| 日期 / 状态 | 2026-10-26 / P800 应用范围验证完成，历史基线待建立 |
 
 ## 实现矩阵
 
@@ -20,19 +20,23 @@
 
 | 层级 | 入口 | 当前结果 |
 |---|---|---|
-| kernel | `test/kernel_level.py` | PASS，24 cases，哨兵通过 |
-| op/A1 | `test/op_level.py` | PASS，命中 5 次，整数回退通过 |
-| 应用 | `test/framework_level.py` | PASS，命中 1 次，输出一致 |
-| 黄金数据 | `script/gen_golden.py`、`check_accuracy.py` | PASS，57/57 |
-| 性能 | `script/bench_perf.py` | 已测三方；历史门禁基线待建立 |
+| kernel | `test/kernel_level.py` | PASS，75 cases，19 个 shape，哨兵通过 |
+| op/A1 | `test/op_level.py` | PASS，命中 9 次，counter 契约与回退通过 |
+| 应用 | `test/framework_level.py` | PASS，三 dtype 共命中 3 次 |
+| 黄金数据 | `script/gen_golden.py`、`check_accuracy.py` | PASS，93/93 |
+| 性能矩阵 | `script/bench_matrix.py` | PASS，36/36 独立子进程 |
+| 性能门禁 | `perf_run.py` + `perf_compare.py` | 0 FAIL，1 NEW（无历史基线） |
 
 ## 关键数字
 
 | 指标 | 结果 |
 |---|---:|
-| 黄金最差 abs / rel | 1.192e-7 / 1.669e-7 |
-| 自研 / FlagGems / 原生延迟 | 0.070173 / 0.060374 / 0.048589 ms |
-| A1 分发开销 | 7.874 us（11.2%） |
+| 黄金最差 abs / rel | 1.192e-7 / 1.680e-7 |
+| 性能矩阵 | 4 shapes × 3 dtypes × 3 implementations = 36 |
+| 自研最佳相对原生 | 0.518×（`2×64×4096` fp32） |
+| 自研最差相对原生 | 9.630×（`1×14336` fp32） |
+| A1 分发开销 | 14.362 us（20.0%） |
 
-结论：P800 正确性 Must 项全绿；由于这是新算子且尚无仓库性能基线，性能
-回归门禁暂不能判定，建立基线后才可标记最终可交付。
+结论：P800 正确性和应用范围矩阵全绿，统一性能门禁执行结果为 0 FAIL；
+但该 case 首次进入注册表，当前判定为 NEW，需负责人确认首个历史基线后
+才能对后续提交进行回归判定。详见 `reports/scope.md`。
