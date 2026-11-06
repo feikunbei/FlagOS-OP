@@ -1,0 +1,45 @@
+# aten.gelu 黄金输入规格。
+# wt-2026-11-06-gelu-p800
+# wt <liyanze1560495@hotmail.com>
+op: aten.gelu
+seed_base: 20261106
+seeds_per_case: 3
+cases:
+  - name: small_and_rank
+    shapes: [[], [1], [17], [64, 1024]]
+    dtypes: [bfloat16, float16, float32]
+    approximations: [none, tanh]
+    distribution: normal
+    scale: 2.0
+    special: [zeros]
+  - name: launch_edges
+    shapes: [[255], [256], [257], [511], [512], [513],
+             [65535], [65536], [65537]]
+    dtypes: [bfloat16, float16, float32]
+    approximations: [none, tanh]
+    distribution: normal
+    scale: 4.0
+    special: [boundary]
+  - name: long_tail
+    shapes: [[1, 14336], [8, 5000], [7, 4097]]
+    dtypes: [bfloat16, float16, float32]
+    approximations: [none, tanh]
+    distribution: normal
+    scale: 4.0
+    special: [boundary]
+  - name: transformer
+    shapes: [[2, 128, 768], [2, 64, 4096], [1, 4, 32, 512]]
+    dtypes: [bfloat16, float16, float32]
+    approximations: [none, tanh]
+    distribution: normal
+    scale: 2.0
+    special: []
+  - name: saturation
+    shapes: [[257]]
+    dtypes: [bfloat16, float16, float32]
+    approximations: [none, tanh]
+    distribution: uniform
+    scale: 10.0
+    special: [zeros, large, boundary]
+tolerance:
+  pointwise_abs: {float32: 1.0e-5, float16: 1.0e-2, bfloat16: 1.0e-2}
