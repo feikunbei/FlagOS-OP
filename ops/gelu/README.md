@@ -58,3 +58,16 @@ python ops/gelu/script/bench_dispatch.py \
 - 证据等级为 C1，不声称 C2/vLLM 生产链验证。
 
 详细数字见 [REPORT.md](REPORT.md) 与 [reports/](reports/)。
+
+## 交付自查清单
+
+- [x] 核心文件齐备：README、REPORT、包入口、reference、register、example、kernel 和 test。
+- [x] kernel、A1 op、C1 framework 三层测试全绿。
+- [x] float16、bfloat16、float32 与两种 approximate 模式均有精度证据。
+- [x] 19 个唯一 shape、360 份黄金数据全部通过。
+- [x] 自研、原生、FlagGems 三方性能矩阵完成，微算子 dispatch 开销已单测。
+- [x] `ops/catalog.yaml`、生成的 `ops/README.md` 和中央性能注册表已更新。
+- [x] 全仓单测 96/96、CI 等价包入口扫描 17/17、`compileall` 通过。
+- [x] 开发、测试、精度、性能、应用范围五份分册已填写。
+- [x] 作者标识和 Git commit 作者一致。
+- 不适用：当前仅交付 P800 单平台，因此本阶段不创建多平台 `MERGE.md`；硬件级 XTC、backward 和 C2 已明确列为范围外，不作为本次交付缺项。

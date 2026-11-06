@@ -6,8 +6,8 @@
 |---|---|
 | 算子 | `aten::gelu` 前向；[reference.py](reference.py) |
 | 模式 | `approximate="none"` / `"tanh"` |
-| 目标设备 / 路线 | `p800-kunlunxin-gems5` / A1 |
-| 日期 / 状态 | 2026-11-06 / 待评审 |
+| 目标设备 / 路线 | P800 物理 XPU 2（单卡 profile `p800-liyanz-gelu-local`，对应标准 `p800-kunlunxin-gems5` 软件锁）/ A1 |
+| 日期 / 状态 | 2026-11-06 / 实现与自测完成（C1） |
 | 证据等级 | C1 mini Transformer MLP；不含 C2 |
 
 ## 实现矩阵
@@ -28,6 +28,8 @@
 | 黄金回归 | PASS | 360/360；最差 abs `1.221e-04` |
 | 性能矩阵 | 完成 | 4 shape × 3 dtype × 2 模式 × 3 实现 = 72 组合 |
 | dispatch | 完成 | exact `7.557 μs`；tanh `8.763 μs` 注册增量 |
+| 中央性能入口 | PASS | `ops.gelu.none/tanh.triton` 已发现；无历史 baseline，均标记 NEW，0 FAIL |
+| 仓库门禁 | PASS | unit 96/96、CI 等价包扫描 17/17、目录生成检查与 compileall 通过 |
 
 ## 关键结果
 
